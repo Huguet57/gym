@@ -44,6 +44,9 @@
         </div>
 
         <div id="container">
+            <div id="idle-container">
+                <button id="save">Guardar</button>
+            </div>
             <div id="maquines">
                 <script type="module">
                     let info = JSON.parse(Cookies.get("info"));
@@ -65,35 +68,48 @@
                         return element;
                     });
 
+                    let set_cookies = () => {
+                        // Cada màquina és un div
+                        let maquines = document.getElementsByClassName("maquina");
+                        
+                        // Map div => JSON
+                        let jsons = [].slice.call(maquines).map(maquina => {
+                            return {
+                                nom: maquina.querySelector("h3").innerText,
+                                foto: maquina.querySelector("img").src,
+                                pes: parseInt(maquina.querySelector(".pes").value)
+                            };
+                        });
+
+                        // Set cookie
+                        Cookies.set("info", JSON.stringify(jsons), { expires: 999999, sameSite: 'Lax' });
+                        console.log(Cookies.get("info"));
+
+                        // Historial
+                        let pesos = [].slice.call(maquines).map(maquina => parseInt(maquina.querySelector(".pes").value));
+                        let date = new Date().toISOString().split('T')[0];
+                        let history = JSON.parse(Cookies.get("history"));
+                        history[date] = pesos;
+                        Cookies.set("history", JSON.stringify(history), { expires: 999999, sameSite: 'Lax' });
+                        console.log(Cookies.get("history"));
+
+                        // Play sound
+                        var audio = new Audio('save.mp3');
+                        audio.play();
+                    };
+                    
+                    // Botó per guardar igual
+                    document.getElementById("save").addEventListener('click', set_cookies);
+
                     // Put HTML value in div
                     for (let i = 0; i < divs_maquines.length; ++i) {
                         // Add trigger to each div
-                        ['keyup', 'click'].forEach(evt => {
-                            divs_maquines[i].addEventListener(evt, () => {
-                                // Cada màquina és un div
-                                let maquines = document.getElementsByClassName("maquina");
-                                
-                                // Map div => JSON
-                                let jsons = [].slice.call(maquines).map(maquina => {
-                                    return {
-                                        nom: maquina.querySelector("h3").innerText,
-                                        foto: maquina.querySelector("img").src,
-                                        pes: parseInt(maquina.querySelector(".pes").value)
-                                    };
-                                });
+                        divs_maquines[i].addEventListener('input', () => {
+                            // Set cookies
+                            set_cookies();
 
-                                // Set cookie
-                                Cookies.set("info", JSON.stringify(jsons), { expires: 999999, sameSite: 'Lax' });
-                                console.log(Cookies.get("info"));
-
-                                // Historial
-                                let pesos = [].slice.call(maquines).map(maquina => parseInt(maquina.querySelector(".pes").value));
-                                let date = new Date().toISOString().split('T')[0];
-                                let history = JSON.parse(Cookies.get("history"));
-                                history[date] = pesos;
-                                Cookies.set("history", JSON.stringify(history), { expires: 999999, sameSite: 'Lax' });
-                                console.log(Cookies.get("history"));
-                            });
+                            // Notify
+                            divs_maquines[i].querySelector(".pes").style.backgroundColor = "green";
                         });
 
                         document.getElementById("maquines").append(divs_maquines[i]);
