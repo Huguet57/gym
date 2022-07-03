@@ -38,7 +38,7 @@
                     <h3>{TITOL}</h3>
                 </div>
                 <div class="input-container">
-                    <input class="pes" type="number" min="0" max="100" step="5" value="{PES}" />
+                    <input class="pes" type="number" min="0" max="100" step="5" size="1" value="{PES}" />
                 </div>
             </div>
         </div>
@@ -107,9 +107,6 @@
                         divs_maquines[i].addEventListener('input', () => {
                             // Set cookies
                             set_cookies();
-
-                            // Notify
-                            divs_maquines[i].querySelector(".pes").style.backgroundColor = "green";
                         });
 
                         document.getElementById("maquines").append(divs_maquines[i]);

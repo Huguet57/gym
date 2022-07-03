@@ -5,3 +5,11 @@
 .maquina {
     margin-bottom: 50px;
 }
+
+input[type="number"] {
+    font-size: 48px;
+}
+
+button {
+    font-size: 36px;
+}
