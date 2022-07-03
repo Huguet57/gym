@@ -11,15 +11,20 @@
         <script type="module" src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
         <script type="module">
             let placeholder_info = {
-                "maquina1": { pes: 20, foto: "maquina1.jpg" },
-                "maquina2": { pes: 15, foto: "maquina2.jpg" },
-                "maquina3": { pes: 25, foto: "maquina3.jpg" },
-                "maquina4": { pes: 30, foto: "maquina4.jpg" },
-                "maquina5": { pes: 40, foto: "maquina5.jpg" }
+                "maquina1": { nom: "Màquina 1", pes: 20, foto: "./fotos/maquina1.jpg" },
+                "maquina2": { nom: "Màquina 2", pes: 15, foto: "./fotos/maquina2.jpg" },
+                "maquina3": { nom: "Màquina 3", pes: 25, foto: "./fotos/maquina3.jpg" },
+                "maquina4": { nom: "Màquina 4", pes: 30, foto: "./fotos/maquina4.jpg" },
+                "maquina5": { nom: "Màquina 5", pes: 40, foto: "./fotos/maquina5.jpg" }
             };
 
-            Cookies.set("info", JSON.stringify(placeholder_info), { expires: 999999, sameSite: 'Lax' });
+            let placeholder_pes = {};
+
+            if (Cookies.get("info") === undefined) Cookies.set("info", JSON.stringify(placeholder_info), { expires: 999999, sameSite: 'Lax' });
+            if (Cookies.get("history") === undefined) Cookies.set("history", JSON.stringify(placeholder_pes), { expires: 999999, sameSite: 'Lax' });
+            
             console.log(Cookies.get("info"));
+            console.log(Cookies.get("history"));
         </script>
     </head>
     <body>
@@ -27,10 +32,13 @@
             <!-- MÀQUINA PLACEHOLDER -->
             <div id="maquina-placeholder">
                 <div class="foto-container">
-                    <img src="./fotos/{FOTO}" />
+                    <img src="{FOTO}" />
+                </div>
+                <div class="titol-container">
+                    <h3>{TITOL}</h3>
                 </div>
                 <div class="input-container">
-                    <input type="number" min="0" max="100" step="5" value="{PES}" />
+                    <input class="pes" type="number" min="0" max="100" step="5" value="{PES}" />
                 </div>
             </div>
         </div>
@@ -49,21 +57,50 @@
                         element.removeAttribute('id');
                         element.classList.add('maquina');
 
-                        // Turn element to string and replace
-                        let string = element.outerHTML;
-                        string = string.replace('{FOTO}', maquina.foto);
-                        string = string.replace('{PES}', maquina.pes);
+                        // // Turn element to string and replace
+                        element.innerHTML = element.innerHTML.replace('{TITOL}', maquina.nom);
+                        element.innerHTML = element.innerHTML.replace('{FOTO}', maquina.foto);
+                        element.innerHTML = element.innerHTML.replace('{PES}', maquina.pes);
 
-                        return string;
+                        return element;
                     });
 
                     // Put HTML value in div
-                    document.getElementById("maquines").innerHTML = divs_maquines.join('\n');
-                </script>
-            </div>
+                    for (let i = 0; i < divs_maquines.length; ++i) {
+                        // Add trigger to each div
+                        ['keyup', 'click'].forEach(evt => {
+                            divs_maquines[i].addEventListener(evt, () => {
+                                // Cada màquina és un div
+                                let maquines = document.getElementsByClassName("maquina");
+                                
+                                // Map div => JSON
+                                let jsons = [].slice.call(maquines).map(maquina => {
+                                    return {
+                                        nom: maquina.querySelector("h3").innerText,
+                                        foto: maquina.querySelector("img").src,
+                                        pes: parseInt(maquina.querySelector(".pes").value)
+                                    };
+                                });
 
-            <div class="save">
-                <button>Fer el dia</button>
+                                // Set cookie
+                                Cookies.set("info", JSON.stringify(jsons), { expires: 999999, sameSite: 'Lax' });
+                                console.log(Cookies.get("info"));
+
+                                // Historial
+                                let pesos = [].slice.call(maquines).map(maquina => parseInt(maquina.querySelector(".pes").value));
+                                let date = new Date().toISOString().split('T')[0];
+                                let history = JSON.parse(Cookies.get("history"));
+                                history[date] = pesos;
+                                Cookies.set("history", JSON.stringify(history), { expires: 999999, sameSite: 'Lax' });
+                                console.log(Cookies.get("history"));
+                            });
+                        });
+
+                        document.getElementById("maquines").append(divs_maquines[i]);
+                    }
+                    
+                    document.getElementById("maquina-placeholder").remove();
+                </script>
             </div>
         </div>
     </body>
