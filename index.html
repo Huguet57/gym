@@ -49,6 +49,8 @@
             </div>
             <div id="maquines">
                 <script type="module">
+                    let audio = new Audio('save.mp3');
+
                     let info = JSON.parse(Cookies.get("info"));
                     let pesos_maquines = Object.values(info);
 
@@ -94,8 +96,7 @@
                         console.log(Cookies.get("history"));
 
                         // Play sound
-                        var audio = new Audio('save.mp3');
-                        audio.play();
+                        if (!(audio.currentTime > 0 && !audio.paused && !audio.ended && audio.readyState > 2)) audio.play();
                     };
                     
                     // Botó per guardar igual
